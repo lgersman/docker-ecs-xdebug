@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "ms-vscode-remote.remote-containers",
+    "ms-azuretools.vscode-docker",
+    "formulahendry.vscode-mysql",
+    "EditorConfig.EditorConfig",
+    "bmewburn.vscode-intelephense-client",
+    "xdebug.php-debug",
+  ]
+}

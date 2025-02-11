@@ -1,0 +1,13 @@
+{
+  "authors": {
+    "name": "lars gersmann",
+    "email": "lars.gersmann@gmail.com"
+  },
+  "version": "0.0.1",
+  "scripts": {
+    "build": "docker build -t $(basename $PWD) .",
+    "start" : "docker run --rm -it --user $(id -u $USER):$(id -g $USER) --add-host=host.docker.internal:host-gateway -v $(pwd):/var/www/html $(basename $PWD)",
+    "clean" : "git clean -Xfd --interactive",
+    "distclean" : "pnpm clean && (docker rmi $(basename $PWD) ||:)"
+  }
+}
