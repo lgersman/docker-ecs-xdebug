@@ -32,4 +32,8 @@ Repository for evaluating and integration of [PHPCS](https://github.com/squizlab
 
   And voilà, you can debug your PHP program in vscode. 
 
+# Snippets
 
+`vendor/bin/ecs check --fix --clear-cache --config ./ecs-config.php --no-progress-bar .`
+
+`php vendor/bin/phpcs -s --no-cache --standard=./ruleset.xml .`

@@ -3,7 +3,7 @@ FROM debian:12-slim
 
 # Install necessary packages
 RUN <<EOF
-  apt-get update && apt-get install -y curl php php-cli php-xdebug php-xml php-zip git unzip 
+  apt-get update && apt-get install -y curl php php-cli php-xdebug php-xml php-zip php-curl git unzip wget
   apt-get clean
 
   # Install Composer
@@ -21,6 +21,9 @@ xdebug.client_port=9005
 xdebug.log_level=0
 FILE
 
+
+ENV ECS_VERSION="12.5.8"
+
 COPY --chmod=755 <<FILE /usr/bin/entrypoint.sh
 #!/usr/bin/env bash
 
@@ -36,10 +39,25 @@ if [[ ! -f /var/www/html/composer.json ]]; then
   }
 }
 EOF
+fi
+
+if [[ ! -d /var/www/html/vendor ]]; then
   composer config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
-  composer require --dev wp-coding-standards/wpcs:3.1.0
-  composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer false 
   composer require --dev symplify/easy-coding-standard:12.5.8 --with-dependencies
+  composer require --dev wp-coding-standards/wpcs:3.1.0 
+
+  # copy generated CodeSniffer.conf over to easy-coding-standards vendor directory
+  cp ./vendor/squizlabs/php_codesniffer/CodeSniffer.conf ./vendor/symplify/easy-coding-standard/vendor/squizlabs/php_codesniffer/CodeSniffer.conf
+  # patch pathS in copied file from '../../'' to '../../../../../'
+  sed -i 's|\.\./\.\./|\.\./\.\./\.\./\.\./\.\./|g' ./vendor/symplify/easy-coding-standard/vendor/squizlabs/php_codesniffer/CodeSniffer.conf
+
+  # (
+  #  cd vendor/symplify/easy-coding-standard
+  #  composer config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+  # #  composer require wp-coding-standards/wpcs:3.1.0 --no-update
+  # )
+
+  true
 fi
 
 exec  \$@
