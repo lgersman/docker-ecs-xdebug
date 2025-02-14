@@ -1,20 +1,8 @@
 <?php
 
-
-// \spl_autoload_register(function($className)
-// {
-//   if( str_starts_with($className, 'WordPressCS\\WordPress')) {
-//     $file=str_replace('\\','/',$className);
-//     $file=str_replace('WordPressCS/', __DIR__ . '/vendor/wp-coding-standards/wpcs/', $file) . '.php';
-//     if(file_exists($file)) {
-//       require_once($file);
-//     }
-//   }
-// });
-
-use PHP_CodeSniffer\Autoload;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
 use PhpCsFixer\Fixer\ControlStructure\YodaStyleFixer;
+use PhpCsFixer\Fixer\Operator\BinaryOperatorSpacesFixer;
 
 $codeSnifferConfig = new PHP_CodeSniffer\Config(["-s", "--no-cache", "--standard=./ruleset.xml"]);
 PHP_CodeSniffer\Autoload::addSearchPath(__DIR__ . '/vendor/wp-coding-standards/wpcs/WordPress', "WordPressCS\WordPress");
@@ -26,12 +14,8 @@ $configure = ECSConfig::configure();
 $codeSnifferRuleset = new PHP_CodeSniffer\Ruleset($codeSnifferConfig);
 
 return $configure->withRules([
-    // our existing PSR12 set from PHP Code Sniffer
+    // import the rules from our loaded codesniffer config
     ...array_values($codeSnifferRuleset->sniffCodes),
-
-    // and the two new rules I wanted from PHP CS Fixer
-    // PhpCsFixer\Fixer\PhpUnit\PhpUnitMethodCasingFixer::class,
-    // PhpCsFixer\Fixer\PhpUnit\PhpUnitTestAnnotationFixer::class,
 ])
   ->withPaths([__DIR__])
   ->withRootFiles()
@@ -64,10 +48,16 @@ return $configure->withRules([
   )
   // use 2 spaces instead of psr12 default (4 spaces)
   ->withSpacing(indentation: '  ')
+  // use editor config if available
+  ->withEditorConfig(true)
 
   ->withConfiguredRule(YodaStyleFixer::class, [
     'equal' => true,
     'identical' => true,
     'less_and_greater' => true,
+  ])
+  // align assoc arrays
+  ->withConfiguredRule(BinaryOperatorSpacesFixer::class, [
+    'default' => 'align',
   ])
 ;

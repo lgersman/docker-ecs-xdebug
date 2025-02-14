@@ -44,20 +44,12 @@ fi
 if [[ ! -d /var/www/html/vendor ]]; then
   composer config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
   composer require --dev symplify/easy-coding-standard:12.5.8 --with-dependencies
-  composer require --dev wp-coding-standards/wpcs:3.1.0 
+  composer require --dev wp-coding-standards/wpcs:3.1.0
 
-  # copy generated CodeSniffer.conf over to easy-coding-standards vendor directory
-  cp ./vendor/squizlabs/php_codesniffer/CodeSniffer.conf ./vendor/symplify/easy-coding-standard/vendor/squizlabs/php_codesniffer/CodeSniffer.conf
-  # patch pathS in copied file from '../../'' to '../../../../../'
-  sed -i 's|\.\./\.\./|\.\./\.\./\.\./\.\./\.\./|g' ./vendor/symplify/easy-coding-standard/vendor/squizlabs/php_codesniffer/CodeSniffer.conf
-
-  # (
-  #  cd vendor/symplify/easy-coding-standard
-  #  composer config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
-  # #  composer require wp-coding-standards/wpcs:3.1.0 --no-update
-  # )
-
-  true
+  # tell phpcs dependency of easy-coding-standard where to find the used standards
+  ./vendor/symplify/easy-coding-standard/vendor/squizlabs/php_codesniffer/bin/phpcs \
+    --config-set installed_paths \
+    "../../../../../phpcsstandards/phpcsextra,../../../../../phpcsstandards/phpcsutils,../../../../../wp-coding-standards/wpcs"
 fi
 
 exec  \$@
