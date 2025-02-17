@@ -2,6 +2,8 @@
 
 Repository for evaluating and integration of [PHPCS](https://github.com/squizlabs/PHP_CodeSniffer)/[PHPCS Fixer](https://github.com/PHP-CS-Fixer/PHP-CS-Fixer) rule sets into [easy-coding-standard](https://github.com/easy-coding-standard/easy-coding-standard).
 
+__This project is a proof of concept developed as a research experiment and will not be actively maintained or further developed.__
+
 # Features
 
 - dockerized development environment
