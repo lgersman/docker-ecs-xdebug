@@ -5,7 +5,6 @@ use PhpCsFixer\Fixer\ControlStructure\YodaStyleFixer;
 use PhpCsFixer\Fixer\Operator\BinaryOperatorSpacesFixer;
 use WordPressCS\WordPress\Sniffs\WP\GlobalVariablesOverrideSniff;
 use WordPressCS\WordPress\Sniffs\Security\EscapeOutputSniff;
-use WordPressCS\WordPress\Helpers\EscapingFunctionsTrait;
 
 $codeSnifferConfig = new PHP_CodeSniffer\Config(["-s", "--no-cache", "--standard=./ruleset.xml"]);
 PHP_CodeSniffer\Autoload::addSearchPath(__DIR__ . '/vendor/wp-coding-standards/wpcs/WordPress', "WordPressCS\WordPress");
@@ -16,9 +15,24 @@ $configure = ECSConfig::configure();
 
 $codeSnifferRuleset = new PHP_CodeSniffer\Ruleset($codeSnifferConfig);
 
+$sniffCodes = $codeSnifferRuleset->sniffCodes;
+unset( $sniffCodes['WordPress.Security.EscapeOutput']);
+
+if( !class_exists('HijackedEscapeOutputSniff') ) {
+  class HijackedEscapeOutputSniff extends EscapeOutputSniff {
+    public function getGroups() {
+      $groups = parent::getGroups();
+      // remove 'printf' from the list of printing functions so that we can use it without any errors
+      $groups['printing_functions']['functions'] = array_diff($groups['printing_functions']['functions'], ['printf', 'wp_die', 'error_log']);
+      return $groups;
+    }
+  }
+}
+
 return $configure->withRules([
-    // import the rules from our loaded codesniffer config
-    ...array_values($codeSnifferRuleset->sniffCodes),
+  // import the rules from our loaded codesniffer config
+  ...array_values($sniffCodes),
+  HijackedEscapeOutputSniff::class,
 ])
   ->withPaths([__DIR__])
   ->withRootFiles()
@@ -66,22 +80,26 @@ return $configure->withRules([
   ->withConfiguredRule(GlobalVariablesOverrideSniff::class, [
     'treat_files_as_scoped' => true,
   ])
-  ->withConfiguredRule(EscapeOutputSniff::class, (function() {
-    $reflectionClass = new \ReflectionClass(EscapeOutputSniff::class);
-    $rule = new EscapeOutputSniff();
-    $traits = $reflectionClass->getTraits();
-    $escapingFunctionsTrait = $traits[EscapingFunctionsTrait::class];
-    $escapingFunctions = $escapingFunctionsTrait->getProperty('escapingFunctions');
-    $escapingFunctions->setAccessible(true);
-    // $value = $escapingFunctions->getValue($rule);
-    $escapingFunctions->setValue($rule, []);
-    return [
-      // 'escapingFunctions' => $value,
-    ];
-  })())
+  // ->withConfiguredRule(HijackedEscapeOutputSniff::class, [
+  // ])
+  // ->withConfiguredRule(EscapeOutputSniff::class, [
+  // ])
   // ->withConfiguredRule(EscapeOutputSniff::class, (function() {
+  //   $reflectionClass = new \ReflectionClass(EscapeOutputSniff::class);
+  //   $rule = new EscapeOutputSniff();
+  //   $traits = $reflectionClass->getTraits();
+  //   $escapingFunctionsTrait = $traits[EscapingFunctionsTrait::class];
+  //   $escapingFunctions = $escapingFunctionsTrait->getProperty('escapingFunctions');
+  //   $escapingFunctions->setAccessible(true);
+  //   // $value = $escapingFunctions->getValue($rule);
+  //   $escapingFunctions->setValue($rule, []);
   //   return [
-  //     'escapingFunctions' => $escapingFunctions,
+  //     // 'escapingFunctions' => $value,
   //   ];
   // })())
+  // // ->withConfiguredRule(EscapeOutputSniff::class, (function() {
+  // //   return [
+  // //     'escapingFunctions' => $escapingFunctions,
+  // //   ];
+  // // })())
 ;

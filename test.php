@@ -1,6 +1,6 @@
 <?php
 
-echo "hello world\n";
+printf("hello world\n");
 
 $complex_obj = [
     'foo'  => 'bar',
@@ -22,11 +22,11 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 $output = curl_exec($ch);
 
 if (false === $output) {
-    echo 'Curl error: ' . curl_error($ch);
+  printf('Curl error: ' . curl_error($ch));
 } else {
-    echo $output;
+  printf($output);
 }
 
 curl_close($ch);
 
-echo "{$foo}\n";
+printf("{$foo}\n");
