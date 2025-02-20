@@ -47,9 +47,7 @@ if [[ ! -d /var/www/html/vendor ]]; then
   composer require --dev wp-coding-standards/wpcs:3.1.0
 
   # tell phpcs dependency of easy-coding-standard where to find the used standards
-  ./vendor/symplify/easy-coding-standard/vendor/squizlabs/php_codesniffer/bin/phpcs \
-    --config-set installed_paths \
-    "../../../../../phpcsstandards/phpcsextra,../../../../../phpcsstandards/phpcsutils,../../../../../wp-coding-standards/wpcs"
+  ./vendor/symplify/easy-coding-standard/vendor/squizlabs/php_codesniffer/bin/phpcs --config-set installed_paths '../../../../../phpcsstandards/phpcsextra,../../../../../phpcsstandards/phpcsutils,../../../../../wp-coding-standards/wpcs'
 fi
 
 exec  \$@

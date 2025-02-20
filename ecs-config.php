@@ -3,6 +3,9 @@
 use Symplify\EasyCodingStandard\Config\ECSConfig;
 use PhpCsFixer\Fixer\ControlStructure\YodaStyleFixer;
 use PhpCsFixer\Fixer\Operator\BinaryOperatorSpacesFixer;
+use WordPressCS\WordPress\Sniffs\WP\GlobalVariablesOverrideSniff;
+use WordPressCS\WordPress\Sniffs\Security\EscapeOutputSniff;
+use WordPressCS\WordPress\Helpers\EscapingFunctionsTrait;
 
 $codeSnifferConfig = new PHP_CodeSniffer\Config(["-s", "--no-cache", "--standard=./ruleset.xml"]);
 PHP_CodeSniffer\Autoload::addSearchPath(__DIR__ . '/vendor/wp-coding-standards/wpcs/WordPress', "WordPressCS\WordPress");
@@ -60,4 +63,25 @@ return $configure->withRules([
   ->withConfiguredRule(BinaryOperatorSpacesFixer::class, [
     'default' => 'align',
   ])
+  ->withConfiguredRule(GlobalVariablesOverrideSniff::class, [
+    'treat_files_as_scoped' => true,
+  ])
+  ->withConfiguredRule(EscapeOutputSniff::class, (function() {
+    $reflectionClass = new \ReflectionClass(EscapeOutputSniff::class);
+    $rule = new EscapeOutputSniff();
+    $traits = $reflectionClass->getTraits();
+    $escapingFunctionsTrait = $traits[EscapingFunctionsTrait::class];
+    $escapingFunctions = $escapingFunctionsTrait->getProperty('escapingFunctions');
+    $escapingFunctions->setAccessible(true);
+    // $value = $escapingFunctions->getValue($rule);
+    $escapingFunctions->setValue($rule, []);
+    return [
+      // 'escapingFunctions' => $value,
+    ];
+  })())
+  // ->withConfiguredRule(EscapeOutputSniff::class, (function() {
+  //   return [
+  //     'escapingFunctions' => $escapingFunctions,
+  //   ];
+  // })())
 ;
